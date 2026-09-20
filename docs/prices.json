@@ -41,6 +41,56 @@
    "total": 949,
    "nightly": 474,
    "source": "Etrip.net"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "pr",
+   "total": 1202,
+   "nightly": 601,
+   "source": "Amimir.com",
+   "official": 1369,
+   "official_src": "Fairmont Pacific Rim"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "fw",
+   "total": 659,
+   "nightly": 329,
+   "source": "Super.com",
+   "official": 809,
+   "official_src": "Fairmont Waterfront"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "pp",
+   "total": 584,
+   "nightly": 292,
+   "source": "Super.com",
+   "official": 891,
+   "official_src": "Pan Pacific Vancouver"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "co",
+   "total": 484,
+   "nightly": 242,
+   "source": "Etrip.net",
+   "official": 586,
+   "official_src": "Coast Coal Harbour Vancouver Hotel by APA"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "wb",
+   "total": 705,
+   "nightly": 353,
+   "source": "Super.com"
+  },
+  {
+   "t": "2026-09-20T06:59:41+00:00",
+   "hotel": "lo",
+   "total": 949,
+   "nightly": 474,
+   "source": "Etrip.net"
   }
  ],
  "checkin": "2026-11-12",
@@ -51,33 +101,45 @@
   {
    "id": "pr",
    "name": "Fairmont Pacific Rim",
-   "sv": "Fairmont-Pacific-Rim/Flyover"
+   "sv": "Fairmont-Pacific-Rim/Flyover",
+   "member": {
+    "label": "Fairmont resident offer",
+    "discount": 0.15
+   }
   },
   {
    "id": "fw",
    "name": "Fairmont Waterfront",
-   "sv": "Fairmont-Waterfront/Flyover"
+   "sv": "Fairmont-Waterfront/Flyover",
+   "member": {
+    "label": "Fairmont resident offer",
+    "discount": 0.15
+   }
   },
   {
    "id": "pp",
    "name": "Pan Pacific Vancouver",
-   "sv": "Pan-Pacific-Vancouver/Flyover"
+   "sv": "Pan-Pacific-Vancouver/Flyover",
+   "member": null
   },
   {
    "id": "co",
    "name": "Coast Coal Harbour Hotel by APA",
-   "sv": "Coast-Coal-Harbour-Vancouver-Hotel-by-APA/Flyover"
+   "sv": "Coast-Coal-Harbour-Vancouver-Hotel-by-APA/Flyover",
+   "member": null
   },
   {
    "id": "wb",
    "name": "The Westin Bayshore",
-   "sv": "The-Westin-Bayshore-Vancouver/Flyover"
+   "sv": "The-Westin-Bayshore-Vancouver/Flyover",
+   "member": null
   },
   {
    "id": "lo",
    "name": "Loden Hotel",
-   "sv": "loden-hotel/Flyover"
+   "sv": "loden-hotel/Flyover",
+   "member": null
   }
  ],
- "updated": "2026-09-20T06:25:26+00:00"
+ "updated": "2026-09-20T06:59:41+00:00"
 }
