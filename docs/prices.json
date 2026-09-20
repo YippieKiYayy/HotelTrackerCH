@@ -1,1 +1,83 @@
-{"history": []}
+{
+ "history": [
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "pr",
+   "total": 1202,
+   "nightly": 601,
+   "source": "Amimir.com"
+  },
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "fw",
+   "total": 659,
+   "nightly": 329,
+   "source": "Super.com"
+  },
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "pp",
+   "total": 584,
+   "nightly": 292,
+   "source": "Super.com"
+  },
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "co",
+   "total": 484,
+   "nightly": 242,
+   "source": "Etrip.net"
+  },
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "wb",
+   "total": 705,
+   "nightly": 353,
+   "source": "Super.com"
+  },
+  {
+   "t": "2026-09-20T06:25:26+00:00",
+   "hotel": "lo",
+   "total": 949,
+   "nightly": 474,
+   "source": "Etrip.net"
+  }
+ ],
+ "checkin": "2026-11-12",
+ "checkout": "2026-11-14",
+ "currency": "CAD",
+ "target_total": null,
+ "hotels": [
+  {
+   "id": "pr",
+   "name": "Fairmont Pacific Rim",
+   "sv": "Fairmont-Pacific-Rim/Flyover"
+  },
+  {
+   "id": "fw",
+   "name": "Fairmont Waterfront",
+   "sv": "Fairmont-Waterfront/Flyover"
+  },
+  {
+   "id": "pp",
+   "name": "Pan Pacific Vancouver",
+   "sv": "Pan-Pacific-Vancouver/Flyover"
+  },
+  {
+   "id": "co",
+   "name": "Coast Coal Harbour Hotel by APA",
+   "sv": "Coast-Coal-Harbour-Vancouver-Hotel-by-APA/Flyover"
+  },
+  {
+   "id": "wb",
+   "name": "The Westin Bayshore",
+   "sv": "The-Westin-Bayshore-Vancouver/Flyover"
+  },
+  {
+   "id": "lo",
+   "name": "Loden Hotel",
+   "sv": "loden-hotel/Flyover"
+  }
+ ],
+ "updated": "2026-09-20T06:25:26+00:00"
+}
