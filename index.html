@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Coal Harbour hotel tracker</title>
+<style>
+:root{
+  --bg:#f3f1ec; --card:#fff; --ink:#1b2a33; --muted:#66757e; --line:#dcd8cf;
+  --accent:#0d5c63; --accent-ink:#fff; --good:#1f7a4d; --bad:#a3382c; --low:#e8f3ee;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#10191d;--card:#182329;--ink:#e9eef0;--muted:#93a3ab;--line:#2a383f;--accent:#5fb7bd;--accent-ink:#0b1417;--good:#5fcf98;--bad:#f08a7c;--low:#17302a}
+}
+:root[data-theme="dark"]{--bg:#10191d;--card:#182329;--ink:#e9eef0;--muted:#93a3ab;--line:#2a383f;--accent:#5fb7bd;--accent-ink:#0b1417;--good:#5fcf98;--bad:#f08a7c;--low:#17302a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Avenir Next","Segoe UI",system-ui,sans-serif}
+main{max-width:680px;margin:0 auto;padding:20px 16px 48px}
+h1{font:600 26px/1.15 Georgia,"Times New Roman",serif;margin:0 0 6px}
+h2{margin:0;font:600 19px/1.2 Georgia,serif}
+.sub{color:var(--muted);margin:0 0 18px}
+.best{background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.best .big{font:600 32px/1.1 Georgia,serif}
+.best .who{opacity:.9;margin-top:2px}
+.hotel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.hotel.cheapest{border-color:var(--good);background:var(--low)}
+.row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.price{font-weight:700;font-size:24px;text-align:right}
+.meta{color:var(--muted);font-size:13px}
+.chg.down{color:var(--good);font-weight:600}.chg.up{color:var(--bad);font-weight:600}
+svg.spark{display:block;width:100%;height:44px;margin:10px 0 6px}
+.links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.links a{text-align:center;text-decoration:none;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:9px 4px;font-size:14px;font-weight:600}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.offers{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0;font-size:14px}
+.offers a{color:var(--accent);font-weight:600}
+.err{padding:16px;border:1px solid var(--bad);border-radius:10px;color:var(--bad)}
+.fine{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Coal Harbour, Nov 12–14</h1>
+  <p class="sub" id="sub">Loading…</p>
+  <div id="app"></div>
+  <p class="fine" id="fine"></p>
+</main>
+<script>
+const fmt=n=>n==null?"—":"$"+Math.round(n).toLocaleString("en-CA");
+const when=t=>new Date(t).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+const SV="https://www.stayvancouverhotels.com/";
+
+function spark(vals){
+  if(vals.length<2) return "";
+  const w=300,h=44,p=4,min=Math.min(...vals),max=Math.max(...vals),rng=max-min||1;
+  const pts=vals.map((v,i)=>[p+i*(w-2*p)/(vals.length-1),h-p-(v-min)*(h-2*p)/rng]);
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <polyline fill="none" stroke="var(--accent)" stroke-width="2" points="${pts.map(q=>q.join(",")).join(" ")}"/>
+    <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--accent)"/></svg>`;
+}
+
+async function load(){
+  const app=document.getElementById("app"), sub=document.getElementById("sub");
+  let d;
+  try{ d=await (await fetch("prices.json?"+Date.now())).json(); }
+  catch(e){ sub.textContent=""; app.innerHTML='<div class="err">Could not load prices.json. Run the "Track hotel prices" workflow once, then reload.</div>'; return; }
+  const hotels=d.hotels||[], hist=d.history||[];
+  if(!hist.length){ sub.textContent="No prices yet."; app.innerHTML='<div class="err">Nothing collected yet. Run the "Track hotel prices" workflow from the Actions tab.</div>'; return; }
+  sub.textContent=`${d.checkin} to ${d.checkout}, 2 guests. ${d.currency}. Updated ${when(d.updated)}.`;
+
+  const rows=hotels.map(h=>{
+    const l=hist.filter(x=>x.hotel===h.id);
+    const last=l[l.length-1], prev=l[l.length-2];
+    return {h,l,last,low:l.length?Math.min(...l.map(x=>x.total)):null,change:last&&prev?last.total-prev.total:null};
+  });
+  const priced=rows.filter(r=>r.last);
+  const cheapest=priced.length?priced.reduce((a,b)=>b.last.total<a.last.total?b:a):null;
+
+  let html="";
+  if(cheapest) html+=`<section class="best"><div class="big">${fmt(cheapest.last.total)} for 2 nights</div><div class="who">Cheapest right now: ${cheapest.h.name}</div></section>`;
+  html+=`<div class="offers" id="offers">Checking Stay Vancouver offers…</div>`;
+  rows.forEach(r=>{
+    const c=r.change==null?"":r.change<0?`<span class="chg down">Down ${fmt(-r.change)}</span>`:r.change>0?`<span class="chg up">Up ${fmt(r.change)}</span>`:"No change";
+    html+=`<article class="hotel${cheapest&&cheapest.h.id===r.h.id?" cheapest":""}">
+      <div class="row"><div><h2>${r.h.name}</h2><div class="meta">${r.last?`${fmt(r.last.nightly)}/night · via ${r.last.source||"Google Hotels"}`:"No price found"}</div></div>
+      <div><div class="price">${fmt(r.last&&r.last.total)}</div><div class="meta" style="text-align:right">${c}</div></div></div>
+      ${spark(r.l.map(x=>x.total))}
+      <div class="meta">Lowest seen ${fmt(r.low)} · ${r.l.length} check${r.l.length===1?"":"s"}</div>
+      <div class="links">
+        <a href="https://www.google.com/travel/search?q=${encodeURIComponent(r.h.name+' Vancouver '+d.checkin+' to '+d.checkout)}" target="_blank" rel="noopener">Google Hotels</a>
+        <a href="${SV+(r.h.sv||"")}" target="_blank" rel="noopener">Stay Vancouver</a>
+      </div></article>`;
+  });
+  app.innerHTML=html;
+  document.getElementById("fine").textContent="Totals come from Google Hotels and may exclude taxes. Gift card offers aren't included in these numbers.";
+
+  try{
+    const o=await (await fetch("offers.json?"+Date.now())).json();
+    document.getElementById("offers").innerHTML=`<b>Stay Vancouver offers</b> (checked ${when(o.updated)}): ${o.codes.length} listed. <a href="https://www.stayvancouverhotels.com/exclusive-offers.php" target="_blank" rel="noopener">See all offers</a>. You'll get a phone alert when a new one appears, like a gift card promo.`;
+  }catch(e){ document.getElementById("offers").remove(); }
+}
+load();
+</script>
+</body>
+</html>
