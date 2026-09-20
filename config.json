@@ -1,0 +1,16 @@
+{
+  "checkin": "2026-11-12",
+  "checkout": "2026-11-14",
+  "adults": 2,
+  "currency": "CAD",
+  "gl": "ca",
+  "target_total": null,
+  "hotels": [
+    {"id": "pr", "name": "Fairmont Pacific Rim", "query": "Fairmont Pacific Rim Vancouver", "match": "pacific rim", "sv": "Fairmont-Pacific-Rim/Flyover"},
+    {"id": "fw", "name": "Fairmont Waterfront", "query": "Fairmont Waterfront Vancouver", "match": "fairmont waterfront", "sv": "Fairmont-Waterfront/Flyover"},
+    {"id": "pp", "name": "Pan Pacific Vancouver", "query": "Pan Pacific Vancouver", "match": "pan pacific", "sv": "Pan-Pacific-Vancouver/Flyover"},
+    {"id": "co", "name": "Coast Coal Harbour Hotel by APA", "query": "Coast Coal Harbour Hotel Vancouver", "match": "coast coal harbour", "sv": "Coast-Coal-Harbour-Vancouver-Hotel-by-APA/Flyover"},
+    {"id": "wb", "name": "The Westin Bayshore", "query": "Westin Bayshore Vancouver", "match": "westin bayshore", "sv": "The-Westin-Bayshore-Vancouver/Flyover"},
+    {"id": "lo", "name": "Loden Hotel", "query": "Loden Hotel Vancouver", "match": "loden", "sv": "loden-hotel/Flyover"}
+  ]
+}
