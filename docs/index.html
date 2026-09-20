@@ -89,10 +89,13 @@ function render(){
     const last=l[l.length-1], prev=l[l.length-2];
     const q=direct[h.id]||null;
     const live=last?last.total:null, dq=q?effective(q):null;
+    const mem=h.member||null, off=last&&last.official?last.official:null;
+    const est=(mem&&off)?Math.round(off*(1-mem.discount)):null;
     let best=null, how="";
     if(live!=null){best=live;how="live price";}
     if(dq!=null&&(best==null||dq<best)){best=dq;how="your "+q.type.toLowerCase();}
-    return {h,l,last,q,live,dq,best,how,low:l.length?Math.min(...l.map(x=>x.total)):null,change:last&&prev?last.total-prev.total:null};
+    if(est!=null&&(best==null||est<best)){best=est;how="estimated "+mem.label.toLowerCase();}
+    return {h,l,last,q,live,dq,mem,off,est,best,how,low:l.length?Math.min(...l.map(x=>x.total)):null,change:last&&prev?last.total-prev.total:null};
   });
   const cand=rows.filter(r=>r.best!=null);
   const cheapest=cand.length?cand.reduce((a,b)=>b.best<a.best?b:a):null;
@@ -110,6 +113,16 @@ function render(){
         :diff<0?`<div class="cmp bad">Your quote is ${fmt(-diff)} higher than the live price.</div>`
         :`<div class="cmp">Your quote matches the live price.</div>`;
     }
+    let estHtml="";
+    if(r.mem){
+      if(r.est!=null){
+        const nights=Math.max(1,Math.round((new Date(d.checkout)-new Date(d.checkin))/86400000));
+        const better=r.live==null||r.est<r.live;
+        estHtml=`<div class="cmp ${better?"good":""}">Estimated ${esc(r.mem.label)}: ${fmt(r.est)} (about ${fmt(r.est/nights)}/night), ${Math.round(r.mem.discount*100)}% off ${fmt(r.off)} from ${esc(r.last.official_src||"the hotel")}.${better?"":" The live price is already lower."}</div><div class="hint">Estimate only. Confirm the offer is open for your dates, and ask whether taxes are included.</div>`;
+      }else{
+        estHtml=`<div class="hint">No estimate for the ${esc(r.mem.label)}: the hotel's own rate wasn't in the latest results.</div>`;
+      }
+    }
     const q=r.q, id=r.h.id;
     const summary=q?`Your quote: ${fmt(q.total)}${q.perk?` − ${fmt(q.perk)} perk = ${fmt(effective(q))}`:""} (${esc(q.type)})`:"Add a resident, government or direct rate";
     html+=`<article class="hotel${cheapest&&cheapest.h.id===id?" cheapest":""}">
@@ -118,6 +131,7 @@ function render(){
       ${spark(r.l.map(x=>x.total))}
       <div class="meta">Live price lowest seen ${fmt(r.low)} · ${r.l.length} check${r.l.length===1?"":"s"}</div>
       ${cmp}
+      ${estHtml}
       <div class="links">
         <a href="https://www.google.com/travel/search?q=${encodeURIComponent(r.h.name+' Vancouver '+d.checkin+' to '+d.checkout)}" target="_blank" rel="noopener">Google Hotels</a>
         <a href="${SV+(r.h.sv||"")}" target="_blank" rel="noopener">Stay Vancouver</a>
