@@ -33,11 +33,23 @@ h2{margin:0;font:600 19px/1.2 Georgia,serif}
 svg.spark{display:block;width:100%;height:44px;margin:10px 0 6px}
 .links{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .links a{text-align:center;text-decoration:none;color:var(--accent);border:1px solid var(--accent);border-radius:8px;padding:9px 4px;font-size:14px;font-weight:600}
-a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a:focus-visible,summary:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .offers{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:18px 0;font-size:14px}
 .offers a{color:var(--accent);font-weight:600}
 .err{padding:16px;border:1px solid var(--bad);border-radius:10px;color:var(--bad)}
 .fine{font-size:12px;color:var(--muted);text-align:center;margin-top:16px}
+details.direct{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+details.direct summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--accent);list-style:none}
+details.direct summary::after{content:"+";float:right;color:var(--muted)}
+details.direct[open] summary::after{content:"\2212"}
+.dform{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.dform .full{grid-column:1/-1}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-width:0;width:100%}
+button{font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 14px;cursor:pointer}
+button.ghost{background:transparent;color:var(--muted);font-weight:500}
+.cmp{font-size:14px;margin-top:8px;font-weight:600}
+.cmp.good{color:var(--good)}.cmp.bad{color:var(--bad)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
@@ -50,7 +62,15 @@ a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <script>
 const fmt=n=>n==null?"—":"$"+Math.round(n).toLocaleString("en-CA");
 const when=t=>new Date(t).toLocaleString("en-CA",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const SV="https://www.stayvancouverhotels.com/";
+const TYPES=["Resident rate","Government rate","CAA member","Direct / phone quote","Other"];
+const DKEY="ch-direct-v1";
+
+let direct={}; try{direct=JSON.parse(localStorage.getItem(DKEY)||"{}");}catch(e){}
+const saveDirect=()=>{try{localStorage.setItem(DKEY,JSON.stringify(direct));}catch(e){}};
+const effective=q=>q.total-(q.perk||0);
+let DATA=null; const openIds=new Set();
 
 function spark(vals){
   if(vals.length<2) return "";
@@ -61,45 +81,95 @@ function spark(vals){
     <circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--accent)"/></svg>`;
 }
 
-async function load(){
-  const app=document.getElementById("app"), sub=document.getElementById("sub");
-  let d;
-  try{ d=await (await fetch("prices.json?"+Date.now())).json(); }
-  catch(e){ sub.textContent=""; app.innerHTML='<div class="err">Could not load prices.json. Run the "Track hotel prices" workflow once, then reload.</div>'; return; }
+function render(){
+  const d=DATA, app=document.getElementById("app");
   const hotels=d.hotels||[], hist=d.history||[];
-  if(!hist.length){ sub.textContent="No prices yet."; app.innerHTML='<div class="err">Nothing collected yet. Run the "Track hotel prices" workflow from the Actions tab.</div>'; return; }
-  sub.textContent=`${d.checkin} to ${d.checkout}, 2 guests. ${d.currency}. Updated ${when(d.updated)}.`;
-
   const rows=hotels.map(h=>{
     const l=hist.filter(x=>x.hotel===h.id);
     const last=l[l.length-1], prev=l[l.length-2];
-    return {h,l,last,low:l.length?Math.min(...l.map(x=>x.total)):null,change:last&&prev?last.total-prev.total:null};
+    const q=direct[h.id]||null;
+    const live=last?last.total:null, dq=q?effective(q):null;
+    let best=null, how="";
+    if(live!=null){best=live;how="live price";}
+    if(dq!=null&&(best==null||dq<best)){best=dq;how="your "+q.type.toLowerCase();}
+    return {h,l,last,q,live,dq,best,how,low:l.length?Math.min(...l.map(x=>x.total)):null,change:last&&prev?last.total-prev.total:null};
   });
-  const priced=rows.filter(r=>r.last);
-  const cheapest=priced.length?priced.reduce((a,b)=>b.last.total<a.last.total?b:a):null;
+  const cand=rows.filter(r=>r.best!=null);
+  const cheapest=cand.length?cand.reduce((a,b)=>b.best<a.best?b:a):null;
 
   let html="";
-  if(cheapest) html+=`<section class="best"><div class="big">${fmt(cheapest.last.total)} for 2 nights</div><div class="who">Cheapest right now: ${cheapest.h.name}</div></section>`;
+  if(cheapest) html+=`<section class="best"><div class="big">${fmt(cheapest.best)} for 2 nights</div><div class="who">Cheapest right now: ${esc(cheapest.h.name)} (${esc(cheapest.how)})</div></section>`;
   html+=`<div class="offers" id="offers">Checking Stay Vancouver offers…</div>`;
+
   rows.forEach(r=>{
     const c=r.change==null?"":r.change<0?`<span class="chg down">Down ${fmt(-r.change)}</span>`:r.change>0?`<span class="chg up">Up ${fmt(r.change)}</span>`:"No change";
-    html+=`<article class="hotel${cheapest&&cheapest.h.id===r.h.id?" cheapest":""}">
-      <div class="row"><div><h2>${r.h.name}</h2><div class="meta">${r.last?`${fmt(r.last.nightly)}/night · via ${r.last.source||"Google Hotels"}`:"No price found"}</div></div>
-      <div><div class="price">${fmt(r.last&&r.last.total)}</div><div class="meta" style="text-align:right">${c}</div></div></div>
+    let cmp="";
+    if(r.q&&r.live!=null){
+      const diff=r.live-r.dq;
+      cmp=diff>0?`<div class="cmp good">Your quote is ${fmt(diff)} lower than the live price.</div>`
+        :diff<0?`<div class="cmp bad">Your quote is ${fmt(-diff)} higher than the live price.</div>`
+        :`<div class="cmp">Your quote matches the live price.</div>`;
+    }
+    const q=r.q, id=r.h.id;
+    const summary=q?`Your quote: ${fmt(q.total)}${q.perk?` − ${fmt(q.perk)} perk = ${fmt(effective(q))}`:""} (${esc(q.type)})`:"Add a resident, government or direct rate";
+    html+=`<article class="hotel${cheapest&&cheapest.h.id===id?" cheapest":""}">
+      <div class="row"><div><h2>${esc(r.h.name)}</h2><div class="meta">${r.last?`${fmt(r.last.nightly)}/night · via ${esc(r.last.source||"Google Hotels")}`:"No price found"}</div></div>
+      <div><div class="price">${fmt(r.live)}</div><div class="meta" style="text-align:right">${c}</div></div></div>
       ${spark(r.l.map(x=>x.total))}
-      <div class="meta">Lowest seen ${fmt(r.low)} · ${r.l.length} check${r.l.length===1?"":"s"}</div>
+      <div class="meta">Live price lowest seen ${fmt(r.low)} · ${r.l.length} check${r.l.length===1?"":"s"}</div>
+      ${cmp}
       <div class="links">
         <a href="https://www.google.com/travel/search?q=${encodeURIComponent(r.h.name+' Vancouver '+d.checkin+' to '+d.checkout)}" target="_blank" rel="noopener">Google Hotels</a>
         <a href="${SV+(r.h.sv||"")}" target="_blank" rel="noopener">Stay Vancouver</a>
-      </div></article>`;
+      </div>
+      <details class="direct" data-id="${id}"${openIds.has(id)?" open":""}>
+        <summary>${summary}</summary>
+        <div class="dform">
+          <select id="dt-${id}" class="full" aria-label="Rate type">${TYPES.map(t=>`<option${q&&q.type===t?" selected":""}>${t}</option>`).join("")}</select>
+          <input id="dp-${id}" type="number" inputmode="decimal" placeholder="2-night total" aria-label="2-night total" value="${q?q.total:""}">
+          <input id="dk-${id}" type="number" inputmode="decimal" placeholder="Perk $ (credit, parking)" aria-label="Perk value" value="${q&&q.perk?q.perk:""}">
+          <input id="dn-${id}" class="full" type="text" maxlength="80" placeholder="Note (who quoted it, cancellation)" aria-label="Note" value="${q?esc(q.note||""):""}">
+          <button data-save="${id}">Save quote</button>
+          <button class="ghost" data-clear="${id}">Clear</button>
+        </div>
+        ${q&&q.note?`<div class="meta" style="margin-top:8px">${esc(q.note)} · saved ${when(q.t)}</div>`:""}
+        <div class="hint">Enter the total the same way as the live price. Hotels often quote before taxes, so ask whether it includes them. Quotes are saved on this phone only.</div>
+      </details>
+    </article>`;
   });
   app.innerHTML=html;
-  document.getElementById("fine").textContent="Totals come from Google Hotels and may exclude taxes. Gift card offers aren't included in these numbers.";
 
+  app.querySelectorAll("details.direct").forEach(el=>el.addEventListener("toggle",()=>{
+    if(el.open) openIds.add(el.dataset.id); else openIds.delete(el.dataset.id);
+  }));
+  app.querySelectorAll("button[data-save]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.save, total=parseFloat(document.getElementById("dp-"+id).value);
+    if(!total||total<=0){alert("Enter the 2-night total first.");return;}
+    direct[id]={type:document.getElementById("dt-"+id).value,total,perk:parseFloat(document.getElementById("dk-"+id).value)||0,note:document.getElementById("dn-"+id).value.trim(),t:Date.now()};
+    saveDirect(); openIds.delete(id); render();
+  });
+  app.querySelectorAll("button[data-clear]").forEach(b=>b.onclick=()=>{
+    delete direct[b.dataset.clear]; saveDirect(); render();
+  });
+  loadOffers();
+}
+
+async function loadOffers(){
+  const box=document.getElementById("offers"); if(!box) return;
   try{
     const o=await (await fetch("offers.json?"+Date.now())).json();
-    document.getElementById("offers").innerHTML=`<b>Stay Vancouver offers</b> (checked ${when(o.updated)}): ${o.codes.length} listed. <a href="https://www.stayvancouverhotels.com/exclusive-offers.php" target="_blank" rel="noopener">See all offers</a>. You'll get a phone alert when a new one appears, like a gift card promo.`;
-  }catch(e){ document.getElementById("offers").remove(); }
+    box.innerHTML=`<b>Stay Vancouver offers</b> (checked ${when(o.updated)}): ${o.codes.length} listed. <a href="https://www.stayvancouverhotels.com/exclusive-offers.php" target="_blank" rel="noopener">See all offers</a> and look for a new gift card promo.`;
+  }catch(e){box.remove();}
+}
+
+async function load(){
+  const app=document.getElementById("app"), sub=document.getElementById("sub");
+  try{ DATA=await (await fetch("prices.json?"+Date.now())).json(); }
+  catch(e){ sub.textContent=""; app.innerHTML='<div class="err">Could not load prices.json. Run the "Track hotel prices" workflow once, then reload.</div>'; return; }
+  if(!(DATA.history||[]).length){ sub.textContent="No prices yet."; app.innerHTML='<div class="err">Nothing collected yet. Run the "Track hotel prices" workflow from the Actions tab.</div>'; return; }
+  sub.textContent=`${DATA.checkin} to ${DATA.checkout}, 2 guests. ${DATA.currency}. Live prices updated ${when(DATA.updated)}.`;
+  document.getElementById("fine").textContent="Live totals come from Google Hotels and may exclude taxes. Gift card offers aren't included in these numbers.";
+  render();
 }
 load();
 </script>
