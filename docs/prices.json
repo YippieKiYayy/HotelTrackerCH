@@ -2321,6 +2321,58 @@
    "total": 904,
    "nightly": 452,
    "source": "Super.com"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "pr",
+   "total": 999,
+   "nightly": 499,
+   "source": "goseek.com",
+   "official": 1470,
+   "official_src": "Fairmont Pacific Rim"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "fw",
+   "total": 576,
+   "nightly": 288,
+   "source": "Super.com",
+   "official": 891,
+   "official_src": "Fairmont Waterfront"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "pp",
+   "total": 585,
+   "nightly": 292,
+   "source": "Reservation Day",
+   "official": 818,
+   "official_src": "Pan Pacific Vancouver"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "co",
+   "total": 591,
+   "nightly": 295,
+   "source": "Super.com",
+   "official": 636,
+   "official_src": "Coast Coal Harbour Vancouver Hotel by APA"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "wb",
+   "total": 750,
+   "nightly": 375,
+   "source": "The Westin Bayshore, Vancouver",
+   "official": 750,
+   "official_src": "The Westin Bayshore, Vancouver"
+  },
+  {
+   "t": "2026-11-02T23:05:43+00:00",
+   "hotel": "lo",
+   "total": 869,
+   "nightly": 434,
+   "source": "Super.com"
   }
  ],
  "checkin": "2026-11-12",
@@ -2371,5 +2423,5 @@
    "member": null
   }
  ],
- "updated": "2026-11-01T19:37:27+00:00"
+ "updated": "2026-11-02T23:05:43+00:00"
 }
