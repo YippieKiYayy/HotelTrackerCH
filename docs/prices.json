@@ -2525,6 +2525,54 @@
    "total": 954,
    "nightly": 477,
    "source": "Traveluro"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "pr",
+   "total": 1109,
+   "nightly": 554,
+   "source": "Etrip.net",
+   "official": 1470,
+   "official_src": "Fairmont Pacific Rim"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "fw",
+   "total": 650,
+   "nightly": 325,
+   "source": "Super.com"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "pp",
+   "total": 605,
+   "nightly": 303,
+   "source": "Super.com",
+   "official": 842,
+   "official_src": "Pan Pacific Vancouver"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "co",
+   "total": 464,
+   "nightly": 232,
+   "source": "Vio.com"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "wb",
+   "total": 596,
+   "nightly": 298,
+   "source": "dealbase.com",
+   "official": 630,
+   "official_src": "The Westin Bayshore, Vancouver"
+  },
+  {
+   "t": "2026-11-06T20:51:20+00:00",
+   "hotel": "lo",
+   "total": 893,
+   "nightly": 446,
+   "source": "Super.com"
   }
  ],
  "checkin": "2026-11-12",
@@ -2575,5 +2623,5 @@
    "member": null
   }
  ],
- "updated": "2026-11-05T21:27:16+00:00"
+ "updated": "2026-11-06T20:51:20+00:00"
 }
